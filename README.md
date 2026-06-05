@@ -31,7 +31,19 @@ This project is a combination of hands-on personal knowledge, independent resear
 
 ## Screenshots
 
-> _Add screenshots here — Wazuh dashboard, AD Users and Computers, Sysmon events, GPO management console_
+**Active Directory Users and Computers — lab.local OU structure with DC01**
+![Active Directory](screenshots/lab_screenshot1.png)
+
+**Group Policy Management — GPOs deployed in lab.local**
+![Group Policy](screenshots/lab_screenshot2.png)
+
+**Wazuh Threat Hunting — live alerts from DESKTOP-7SD066A**
+![Wazuh Threat Hunting](screenshots/lab_screenshot3.png)
+
+**Wazuh Endpoints Dashboard — agents registered (Windows 10 & Windows Server 2022)**
+> Note: Due to host resource constraints, only one Windows VM can run alongside Wazuh at a time. This is a known lab limitation.
+
+![Wazuh Dashboard](screenshots/lab_screenshot4.png)
 
 ---
 
