@@ -613,3 +613,107 @@ This project was designed to move beyond basic tool installation and focus on op
 The most valuable part of the lab was learning how enterprise systems fail, how telemetry flows through the environment, and how to methodically troubleshoot issues across Windows, Linux, networking, and SIEM infrastructure.
 
 The environment will continue evolving with additional detection engineering, network monitoring, automation, and threat simulation capabilities.
+
+---
+
+# 8. Security Event Investigation — Sysmon Rule 61638
+
+## Alert Summary
+
+| Field | Value |
+|---|---|
+| Rule ID | 61638 |
+| Rule Level | 12 (High) |
+| Description | Sysmon - Suspicious Process - dllhost.exe |
+| MITRE Technique | T1055 – Process Injection |
+| MITRE Tactic | Defense Evasion, Privilege Escalation |
+| Agent | DESKTOP-7SD066A |
+| Timestamp | Jun 5, 2026 @ 00:22:30 |
+
+---
+
+## Investigation
+
+### Step 1 — Identify the Process
+
+Wazuh fired a level 12 alert on `dllhost.exe` flagged under MITRE T1055 (Process Injection). This binary is a known living-off-the-land (LOLBin) target commonly abused for process injection and COM object hijacking, which is why Wazuh's Sysmon ruleset triggers on it by default.
+
+**Key fields reviewed:**
+
+| Field | Value |
+|---|---|
+| Image | `C:\Windows\System32\dllhost.exe` |
+| Command Line | `"C:\Windows\system32\DllHost.exe" /Processid:{4A616E61-3BFE-4F5C-937F-B8602BF16679}` |
+| Parent Process ID | 808 |
+| Parent Image | — (not captured) |
+| User | `LAB\Administrator` |
+| Integrity Level | High |
+| Current Directory | `C:\Windows\system32\` |
+
+---
+
+### Step 2 — Verify File Integrity
+
+Hash values were reviewed against known good Microsoft binaries:
+
+| Hash Type | Value |
+|---|---|
+| MD5 | DFE1E4B1B8714CBE1005EE9413C2BAE9 |
+| SHA256 | 0309834D40475CCD5A88C48F7FF5EC62E5C6798900357DD83665C3D0345124E0 |
+| IMPHASH | CF79FCE90FCED31836373F3E48251A5D |
+
+File version `10.0.19041.3636` matches a legitimate Microsoft Windows 10 build. Hashes are consistent with a known good system binary. No tampering detected.
+
+---
+
+### Step 3 — Analyze the Command Line
+
+The `/Processid:{4A616E61-3BFE-4F5C-937F-B8602BF16679}` argument is a registered COM object GUID. This is standard behavior for the COM Surrogate process — Windows uses dllhost.exe to host COM objects outside of the calling process to prevent crashes from propagating. This GUID represents a legitimate registered COM object, not an injected payload.
+
+---
+
+### Step 4 — Review Parent Process
+
+Parent PID 808 with no captured parent image is consistent with `services.exe`, which commonly spawns dllhost.exe for background COM operations. The null parent image is a Sysmon telemetry gap — not an indicator of malicious activity in this context.
+
+---
+
+### Step 5 — Review User Context
+
+The process ran under `LAB\Administrator` at High integrity during an active administrator session. This is consistent with normal COM activity triggered by administrator-level operations on the endpoint, including the SCAP Auto-Fix Engine remediation activity that was running on this machine at the time.
+
+---
+
+## Verdict
+
+**Benign — Legitimate Windows COM Surrogate Activity**
+
+All indicators point to normal Windows behavior:
+
+- Binary located in the correct system path
+- File hashes match a known good Microsoft binary
+- Command line contains a valid registered COM GUID
+- Parent process consistent with services.exe
+- User context matches active admin session
+- No anomalous network connections or child processes observed
+
+---
+
+## Why the Alert Fired
+
+Wazuh rule 61638 fires on any `dllhost.exe` process creation event captured by Sysmon, regardless of context. This is by design — dllhost.exe is a high-value LOLBin target and the rule is intentionally broad to ensure analysts review every instance. The rule requires human triage to determine legitimacy, which is exactly what this investigation documents.
+
+---
+
+## Lesson Learned
+
+Not every high-severity alert is malicious. Effective SOC work requires:
+
+- Reviewing full event context before escalating
+- Verifying file hashes against known good baselines
+- Understanding normal Windows process behavior
+- Documenting triage decisions with supporting evidence
+- Tuning detection rules to reduce false positives in your environment
+
+This is a candidate for Wazuh rule tuning — adding a condition to exclude known-good COM GUIDs from triggering rule 61638 would reduce noise while preserving detection capability for truly anomalous dllhost.exe behavior.
+
