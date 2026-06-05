@@ -21,6 +21,20 @@ Rather than only documenting successful deployments, this repository focuses hea
 
 ---
 
+## Background
+
+This lab was built by a veteran and cybersecurity professional currently pursuing a bachelor's degree in cybersecurity/networking. The author holds a CompTIA Security+ certification, has a background in DoD telecommunications and CAC/PKI infrastructure, and has worked as an ISSO supporting cleared environments.
+
+This project is a combination of hands-on personal knowledge, independent research, and AI-assisted documentation (Claude by Anthropic). The lab design, troubleshooting, and security concepts were driven by the author's own experience and learning — AI and research were used as tools to supplement and document that process, the same way a practitioner might use documentation, forums, or Copilot in a professional environment.
+
+---
+
+## Screenshots
+
+> _Add screenshots here — Wazuh dashboard, AD Users and Computers, Sysmon events, GPO management console_
+
+---
+
 # Technologies Used
 
 | Technology                | Purpose                                   |
@@ -278,8 +292,8 @@ Understanding inheritance and precedence is essential when troubleshooting Group
 
 ### Symptoms
 
-* “Cannot contact domain controller”
-* “The specified domain does not exist”
+* "Cannot contact domain controller"
+* "The specified domain does not exist"
 
 ### Root Cause
 
@@ -304,7 +318,7 @@ DNS is the foundation of Active Directory communication.
 
 ### Symptoms
 
-* “Incorrect username or password”
+* "Incorrect username or password"
 * Domain credentials rejected
 
 ### Root Cause
